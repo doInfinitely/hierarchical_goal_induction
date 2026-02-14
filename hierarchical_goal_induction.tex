@@ -1,0 +1,172 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+
+\documentclass[10pt, a4paper]{article}
+
+% ---------------------------------------------------------------------------- %
+%  Packages
+% ---------------------------------------------------------------------------- %
+\usepackage[left=1.4cm, top=1.4cm, right=1.4cm, bottom=1.8cm, footskip=.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{hyperref}
+
+% ---------------------------------------------------------------------------- %
+%  Fonts — match awesome-cv defaults
+% ---------------------------------------------------------------------------- %
+%\setmainfont[
+%  Path=fonts/,
+%  UprightFont=*-Regular,
+%  BoldFont=*-Bold,
+%  ItalicFont=*-It,
+%  BoldItalicFont=*-BoldIt,
+%]{SourceSansPro}
+
+% Fallback if you don't have the font files locally:
+ \usepackage{sourcesanspro}
+
+% ---------------------------------------------------------------------------- %
+%  Colors — awesome-skyblue palette from awesome-cv
+% ---------------------------------------------------------------------------- %
+\definecolor{awesome}{HTML}{0395DE}
+\definecolor{darktext}{HTML}{414141}
+\definecolor{text}{HTML}{333333}
+\definecolor{graytext}{HTML}{5D5D5D}
+\definecolor{lighttext}{HTML}{999999}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=awesome,
+  urlcolor=awesome,
+}
+
+\color{text}
+
+% ---------------------------------------------------------------------------- %
+%  Section styling — mimic awesome-cv \cvsection
+%  First 3 chars in awesome color, rest dark, with a rule underneath
+% ---------------------------------------------------------------------------- %
+\newcommand{\cvsection}[1]{%
+  \bigskip
+  {\Large\bfseries\color{awesome}\MakeLowercase{#1}}%
+  \par\vspace{2pt}%
+  {\color{lighttext}\hrule height 0.6pt}%
+  \medskip
+}
+
+% ---------------------------------------------------------------------------- %
+%  Subsection styling
+% ---------------------------------------------------------------------------- %
+\newcommand{\cvsubsection}[1]{%
+  \medskip
+  {\large\bfseries\color{darktext}#1}%
+  \smallskip
+}
+
+% ---------------------------------------------------------------------------- %
+%  Header
+% ---------------------------------------------------------------------------- %
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\footnotesize\color{lighttext}\today}
+\fancyfoot[C]{\footnotesize\color{lighttext}Remy Ochei~~~$\cdot$~~~Hierarchical Goal Induction}
+\fancyfoot[R]{\footnotesize\color{lighttext}\thepage}
+
+% ---------------------------------------------------------------------------- %
+%  List styling
+% ---------------------------------------------------------------------------- %
+\setlist[enumerate]{
+  leftmargin=1.5em,
+  itemsep=4pt,
+  parsep=0pt,
+  label={\color{awesome}\textbf{\arabic*.}},
+}
+
+% ---------------------------------------------------------------------------- %
+%  Document
+% ---------------------------------------------------------------------------- %
+\begin{document}
+
+% --- Title block ------------------------------------------------------------ %
+\begin{center}
+  {\fontsize{28}{34}\selectfont\color{darktext}\textbf{Hierarchical Goal Induction}}\\[8pt]
+  {\color{graytext}\textsc{Remy Ochei}}
+\end{center}
+
+\bigskip
+
+% --- Hierarchical Detection ------------------------------------------------- %
+\cvsection{Hierarchical Detection}
+
+The general system works as follows. We have a ``retina'' that feeds into a detection model. In the case of vision, we output the top-left and bottom-right pixel coordinates on our retina for a detected object, along with a class label. In the case of audition, operating on a mel spectrogram, we output the bounds of our detection (either a bounding box or a temporal span) together with a frequency mask, so that we know which frequencies belong to our sound.
+
+We scale up and pad our detection, then feed it into the hierarchical detector again recursively until we produce the null detection. We also move ``along'' a level by conditioning on the previous detection.
+
+% --- The Hierarchical Goal Inducer ------------------------------------------ %
+\cvsection{The Hierarchical Goal Inducer}
+
+Now I will describe the hierarchical goal inducer. Its behavior is simple: conditioned on the contents of its ``history retina,'' it outputs the start and end of any plans it sees being executed.
+
+How do we train such a system? We can exploit the accessibility tree in macOS. As we construct the history on the retina (essentially a video), we simultaneously create a parallel JSON-based log of events. We send this log to our favorite LLM provider to detect plans and label them with descriptions. This is the level-0 training signal for our hierarchical goal inducer.
+
+Now that we have a trained goal inducer (outputting only the temporal span of each plan for now), we can take new action trajectories and delimit goals at multiple levels of the hierarchy.
+
+% --- The Preference Model --------------------------------------------------- %
+\cvsection{The Preference Model}
+
+Next, we produce a model that, conditioned on the history we have on our retina, takes in an action and outputs a probability. This is our preference model.
+
+% --- The Action Model ------------------------------------------------------- %
+\cvsection{The Action Model}
+
+We attach a GPT-style head conditioned on our history and the contents of a scratchpad, and predict a payload representing our next action at each timestep. This is our first action model.
+
+The action model is autoregressive in two dimensions: along the payload dimension and along the temporal dimension. The generation of each new payload is conditioned on the previous one.
+
+% --- The Training Loop ------------------------------------------------------ %
+\cvsection{The Training Loop}
+
+We train the action model through teacher forcing, then sample from the trained action model to generate data for the preference model.
+
+Once we have a trained preference model, we can use search of all kinds to maximize the probability of an action. This constitutes a second ``action'' model---here we apply brute force, guided by the preference model.
+
+To recap:
+
+\begin{enumerate}
+  \item Train a GPT-style model to predict actions via teacher forcing.
+  \item Sample this model to generate training data for the preference model.
+  \item Apply brute-force search to maximize the preference model's output.
+  \item Distill the findings via supervised learning on context--action pairs discovered through brute-force search. Here we must search for the optimal architecture; there is no way around it.
+\end{enumerate}
+
+So we started with the GPT-style predictor, but we were able to level up to a leaner, meaner model. We can now replace the original GPT model with our distilled version and run the process again.
+
+% --- Hierarchical Plan Detector v2.0 --------------------------------------- %
+\cvsection{Hierarchical Plan Detector v2.0}
+
+The first version of the hierarchical plan detector only detected temporal bounds. Now we add a GPT-style head conditioned on our history and apply it recursively, cropping the history temporally and ``scaling up'' in the time dimension.
+
+We train both the bounds detector and the GPT head together.
+
+To recap:
+
+\begin{enumerate}
+  \item \textbf{Stage 1:} Train a plan-bounds detector that we can use hierarchically with a scale-and-pad operation.
+  \item \textbf{Stage 2:} Add a GPT-2-style head that we teacher-force with the cloud LLM's outputs.
+  \item \textbf{Stage 3:} We no longer need the cloud LLM provider and can detect and annotate nested plans locally.
+  \item \textbf{Stage 4:} We fill our ``actor'' network's plan scratchpad with the outputs of the distilled plan inducer. The actor's action predictions are trained conditioned on the scratchpad's contents.
+\end{enumerate}
+
+% --- The Goal-to-Action Mapper ---------------------------------------------- %
+\cvsection{The Goal-to-Action Mapper}
+
+Finally, we have an agent with a trained ``scratchpad''---a designated region in the network where we can inscribe a goal, and the agent will attempt to achieve it. It will not try to talk its way there; instead, it will output actions.
+
+We have arrived at the goal-to-action mapper architecture. \textit{QED.}
+
+\end{document}
