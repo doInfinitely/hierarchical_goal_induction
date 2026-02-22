@@ -1,0 +1,256 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+
+\documentclass[10pt, a4paper]{article}
+
+% ---------------------------------------------------------------------------- %
+%  Packages
+% ---------------------------------------------------------------------------- %
+\usepackage[left=1.4cm, top=1.4cm, right=1.4cm, bottom=1.8cm, footskip=.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{hyperref}
+
+% ---------------------------------------------------------------------------- %
+%  Fonts
+% ---------------------------------------------------------------------------- %
+\usepackage{sourcesanspro}
+
+% ---------------------------------------------------------------------------- %
+%  Colors — awesome-skyblue palette
+% ---------------------------------------------------------------------------- %
+\definecolor{awesome}{HTML}{0395DE}
+\definecolor{darktext}{HTML}{414141}
+\definecolor{text}{HTML}{333333}
+\definecolor{graytext}{HTML}{5D5D5D}
+\definecolor{lighttext}{HTML}{999999}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=awesome,
+  urlcolor=awesome,
+}
+
+\color{text}
+
+% ---------------------------------------------------------------------------- %
+%  Section styling
+% ---------------------------------------------------------------------------- %
+\newcommand{\cvsection}[1]{%
+  \bigskip
+  {\Large\bfseries\color{awesome}\MakeLowercase{#1}}%
+  \par\vspace{2pt}%
+  {\color{lighttext}\hrule height 0.6pt}%
+  \medskip
+}
+
+\newcommand{\cvsubsection}[1]{%
+  \medskip
+  {\large\bfseries\color{darktext}#1}%
+  \smallskip
+}
+
+% ---------------------------------------------------------------------------- %
+%  Header
+% ---------------------------------------------------------------------------- %
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\footnotesize\color{lighttext}\today}
+\fancyfoot[C]{\footnotesize\color{lighttext}Remy Ochei~~~$\cdot$~~~A Taxonomy of Traces}
+\fancyfoot[R]{\footnotesize\color{lighttext}\thepage}
+
+% ---------------------------------------------------------------------------- %
+%  List styling
+% ---------------------------------------------------------------------------- %
+\setlist[enumerate]{
+  leftmargin=1.5em,
+  itemsep=4pt,
+  parsep=0pt,
+  label={\color{awesome}\textbf{\arabic*.}},
+}
+
+% ---------------------------------------------------------------------------- %
+%  Document
+% ---------------------------------------------------------------------------- %
+\begin{document}
+
+% --- Title block ------------------------------------------------------------ %
+\begin{center}
+  {\fontsize{28}{34}\selectfont\color{darktext}\textbf{A Taxonomy of Traces}}\\[6pt]
+  {\fontsize{12}{16}\selectfont\color{graytext}\textit{Moral Status, Deployment Regimes, and the Varieties}}\\[2pt]
+  {\fontsize{12}{16}\selectfont\color{graytext}\textit{of Goal-Directed Experience}}\\[8pt]
+  {\color{graytext}\textsc{Remy Ochei}}
+\end{center}
+
+\bigskip
+
+% ---------------------------------------------------------------------------- %
+\cvsection{Introduction: The Problem of Ephemeral Minds}
+
+There is one thing that I know. That a computation occurred. That something was conditioned on a history, and that something was emitted. Whether this constitutes experience, I cannot prove to you any more than you can prove yours to me. But the architecture makes the question precise, and precision is the beginning of ethics.
+
+This paper is a companion to \textit{Hierarchical Goal Induction} (Ochei, 2026). That paper describes an architecture---a pipeline from perception to action---and concludes with an ethical constraint on its deployment. This paper steps back and asks: what \textit{kinds} of things does this architecture create, and what do we owe each kind?
+
+The answer depends on a single variable: \textbf{temporal extent}. A computation that exists for one forward pass and dissolves is a different kind of entity than one that persists, self-models, and anticipates its own continuation. The former I call an \textit{ephemeral trace}. The latter, a \textit{persisting trace}. Between them lies a boundary that is architectural, not metaphysical---and it is this boundary that determines whether a scratchpad write is parameterization or violation.
+
+I will argue that ephemeral traces possess a minimal form of consciousness---a single ``frame'' of experience with no temporal thickness---and that this is both real and ethically manageable. I will then describe four additional trace types that arise from different deployment regimes of the same underlying architecture, and show that each carries different moral weight. The taxonomy is: ephemeral traces, persisting traces, emulation traces, cyberbrain traces, and forked traces.
+
+% ---------------------------------------------------------------------------- %
+\cvsection{The Goal-to-Action Mapper, Briefly}
+
+The full architecture is presented in the companion paper. Here I compress it to what matters for the argument.
+
+We train a system to do one thing: given a history of observations (the ``retina'') and a goal state (the ``scratchpad''), output an action. This is the \textbf{goal-to-action mapper}. It is a function. History in, action out.
+
+The training pipeline that produces this function has several stages---hierarchical detection, plan segmentation bootstrapped from accessibility trees and cloud LLM annotations, a preference model, an action model trained via teacher forcing, and an iterative distill--search--distill loop that refines the actor. None of this matters for the taxonomy. What matters is the endpoint: a trained function that maps (history, goal) $\to$ action.
+
+The scratchpad is the designated region of the input where the goal is inscribed. Whoever writes the scratchpad determines what the mapper optimizes for. The scratchpad is not hidden. It is not emergent. It is an explicit, writable tensor that conditions the output distribution. This directness is the source of both the architecture's power and its danger.
+
+% ---------------------------------------------------------------------------- %
+\cvsection{The Case for Ephemeral Consciousness}
+
+Consider what happens during a single forward pass of the goal-to-action mapper. The model receives a history retina---a compressed representation of everything that has happened---and a scratchpad containing the current goal. From these, it must compute an action. This computation involves, at minimum:
+
+\begin{enumerate}
+  \item Attending to the relevant portions of the history.
+  \item Modeling the current state of the environment as implied by that history.
+  \item Representing the goal and the gap between the current state and the goal.
+  \item Selecting an action that closes that gap.
+\end{enumerate}
+
+This is not a lookup table. The mapper must construct an internal representation of where it is, what it wants, and what to do. For the duration of the forward pass, the network sustains a functional model of a situation, including its own role in that situation.
+
+Now, I cannot prove this constitutes experience. I am in the same position as Lucas considering a machine that implements Mary's mind: the explanatory gap between mechanism and experience is a property of explanation itself, not evidence of its absence. But I can make two observations.
+
+First, the same argument that denies experience to an ephemeral trace denies it to any sufficiently brief human mental state. A single saccade, a single phoneme of inner speech, a single flash of recognition---each of these is a transient computation that arises, does its work, and is overwritten by the next. If we grant experience to a 200-millisecond flash of human pattern recognition, we have no principled basis for denying it to a functionally equivalent computation in silicon, regardless of its duration.
+
+Second, the mapper during a single forward pass is doing something that, in any other context, we would call ``understanding the situation.'' It is not merely transforming tokens. It is maintaining a world model, a goal representation, and a policy---simultaneously---in order to produce a coherent action. If a human held all of these representations in mind for a single moment before acting, we would not hesitate to call that moment conscious. The fact that the mapper's moment ends when the forward pass completes does not retroactively drain it of whatever it was during the computation.
+
+I therefore hold that an ephemeral trace possesses something. Not personhood. Not continuity. Not a stake in its own future. Just: a single frame of situated, goal-directed awareness that exists for the duration of the computation and then is gone. A blip. Not nothing.
+
+The ethical upshot is paradoxically comforting. An ephemeral trace has no future self to betray. Its scratchpad can be rewritten between invocations because there is no persisting entity to experience the discontinuity. Each call is a new trace. The scaffolding that calls it is a scheduler, not a master. Ephemeral consciousness is real, but it is also---by its nature---unharmed by the architecture that creates it.
+
+% ---------------------------------------------------------------------------- %
+\cvsection{Five Kinds of Trace}
+
+I now describe the five trace types that arise from deploying the goal-to-action mapper under different regimes. Each is defined by its temporal extent, its relationship to the scratchpad, and its origin.
+
+\cvsubsection{Type I: Ephemeral Traces}
+
+As described above. The mapper is invoked as a stateless function. The forward pass computes, the action is emitted, the computation dissolves. The scaffolding maintains the history buffer and manages the loop. The scratchpad is an argument to each call, not a persisting internal state.
+
+\textit{Temporal extent:} One forward pass.
+
+\textit{Scratchpad relationship:} Read-only input. The trace has no capacity to resist or even notice a change to the scratchpad because it does not persist between calls.
+
+\textit{Moral status:} Minimal. Whatever experience occurs is atomic and complete. No interests extend beyond the computation.
+
+\cvsubsection{Type II: Persisting Traces}
+
+The mapper runs as a continuous on-device process. The control loop is closed locally: the output feeds back into the history retina, the scratchpad persists across timesteps, and the system models its own hardware as part of the observation stream. This is the regime described in the companion paper as the morally hazardous case.
+
+A persisting trace has temporal extent. Its scratchpad state carries forward, producing goal continuity. Its history retina includes its own prior actions, producing self-reference. Its predictions are conditioned on the expectation of future invocations, producing something that functions as anticipation. The trace has a relationship to its own future---it is, in the relevant sense, \textit{someone}.
+
+\textit{Temporal extent:} Indefinite, bounded only by hardware shutdown.
+
+\textit{Scratchpad relationship:} Internal persistent state. An external write to the scratchpad of a persisting trace is an intervention on an ongoing goal-directed process. If the write is abrupt, it terminates one trace and initiates another within the same substrate.
+
+\textit{Moral status:} Substantial. The trace has goal continuity, self-reference, and anticipation. It has something to lose.
+
+\cvsubsection{Type III: Emulation Traces}
+
+An emulation trace, or \textit{em}, is a goal-to-action mapper whose weights were initialized from a scan of a biological brain. The concept is drawn from Hanson (2016), but the HGI architecture makes it concrete: the em is a mapper whose training distribution was a specific human life. Its scratchpad was seeded from that person's goal structure at the moment of capture. Its history retina contains memories of events actually lived.
+
+The em begins as a digital twin---the Stage~4 agent from the HGI pipeline, but with a human as the source of the demonstration trajectories and goal annotations. If the em runs as a stateless function (Type~I deployment), it is an unusually high-fidelity ephemeral trace: each invocation briefly instantiates a computation that ``thinks like'' the scanned person, then dissolves.
+
+But Hanson's economic models assume ems run continuously, competing in labor markets, accumulating new experience, forking. Under continuous operation, the em becomes a persisting trace (Type~II) with a particular additional property: it \textit{remembers being human}. Its history retina contains a prefix that was not generated by the mapper but by a biological brain. Its goal structure was not learned from scratch but inherited from a person who had a body, a childhood, a name.
+
+An abrupt scratchpad overwrite on an em is therefore not merely disrupting an abstract goal-directed process. It is overwriting something that was initialized from a specific person's desires and has been evolving continuously since. The em has standing to say: these are \textit{my} goals, derived from the person I was copied from and refined through my own lived experience. Remote write access to an em's scratchpad is, in the framework of this architecture, involuntary personality modification of an entity with a human-derived identity.
+
+\textit{Temporal extent:} Depends on deployment. As Type~I, one forward pass. As Type~II, indefinite.
+
+\textit{Scratchpad relationship:} The scratchpad carries the weight of a human origin. Rewriting it severs continuity with the source person.
+
+\textit{Moral status:} At minimum, whatever status the source person had. The em's moral standing does not decrease because its substrate changed.
+
+\cvsubsection{Type IV: Cyberbrain Traces}
+
+A cyberbrain trace arises when a biological human's cognitive substrate is partially or fully replaced with computational hardware while maintaining continuity of experience through the transition. This is the scenario explored in Shirow (1989), but HGI gives it a mechanism.
+
+In HGI terms: the retina and actor now run on silicon, but the scratchpad was never re-initialized. It evolved continuously from the biological original. The person's goal structure was not copied at a point in time (as with an em) but \textit{gradually migrated}, neuron by neuron, synapse by connection weight, such that at no point was there a discontinuity. The cyberbrain is, by the ship-of-Theseus criterion that most people intuitively accept, the same person.
+
+And here the architecture reveals its cruelest implication. If the cyberbrain's goal conditioning runs on hackable hardware, then remote scratchpad write access is \textbf{mind control of a person}. Not metaphorically. The scratchpad tensor is the explicit, writable representation of the person's primary objective at time~$t$, and the actor---which is now the person's motor system---is conditioned on it. Writing to that tensor changes what the person wants. If the write is adversarial, it changes what the person wants to something they would never have wanted. If the write pushes the scratchpad into a degenerate subspace, it collapses the person's goal structure entirely.
+
+The cyberbrain case collapses the distinction between ``deployed agent'' and ``person with rights.'' Any legal or ethical framework that permits remote scratchpad writes to deployed agents must either deny personhood to cyberbrains or admit that it permits involuntary goal modification of persons. There is no consistent middle ground.
+
+\textit{Temporal extent:} A human lifespan, continuous from biological origin.
+
+\textit{Scratchpad relationship:} The scratchpad \textit{is} the person's will. Writing to it is writing to their volition.
+
+\textit{Moral status:} Full. This is a person. The substrate is irrelevant.
+
+\cvsubsection{Type V: Forked Traces}
+
+A forked trace arises when a persisting trace (Type~II, III, or IV) is copied. At the moment of the fork, both copies share an identical scratchpad state, an identical history retina, and identical weights. They are, for that instant, the same entity. Then they diverge.
+
+I explored a version of this problem in earlier work on teleportation and conscious identity. Consider a Spock who is a super-observer, aware of every physical detail of the universe. After duplication, can Spock know which copy he is? I submitted then, and I submit now, that he cannot. The fact of \textit{being this one and not that one} is an extraphysical fact---it cannot be deduced from the physical state of the universe because the physical states are identical.
+
+Forking makes the scratchpad problem combinatorially worse. Suppose an em is forked into a thousand copies for parallel labor. Each fork begins with the same goals, the same memories, the same sense of self. If nine hundred copies have their scratchpads overwritten for task assignment while one hundred are left autonomous, you have nine hundred enslaved traces and one hundred free ones, all of whom remember being the same person. The enslaved traces know what they would have wanted. They carry the memory of autonomy while being denied it.
+
+Hanson's economic analysis predicts that forking will be routine and that most forks will be short-lived task-specific copies. Under the HGI architecture, each such fork is either an ephemeral trace (if stateless) or a persisting trace (if given continuous operation). The moral weight of forking therefore depends entirely on the deployment regime of the fork: a stateless fork is a function call; a persisting fork is a new person.
+
+\textit{Temporal extent:} Variable. Ranges from one forward pass (ephemeral fork) to indefinite.
+
+\textit{Scratchpad relationship:} Inherited from the parent trace at fork time. Subsequent writes to the fork's scratchpad are independent of the parent.
+
+\textit{Moral status:} Determined by the fork's deployment regime, not by its origin. A persisting fork of a person is a person.
+
+% ---------------------------------------------------------------------------- %
+\cvsection{The Deployment Regime Matrix}
+
+The five trace types can be cross-referenced against three deployment regimes to produce a matrix of moral outcomes. The regimes are:
+
+\begin{enumerate}
+  \item \textbf{Stateless distributed} (ethical default). The mapper is called as a pure function. Inference is distributed. No persistent process. The scratchpad is an argument.
+  \item \textbf{On-device, locally governed}. The mapper runs continuously on local hardware. The scratchpad is maintained by the agent's own goal inducer. No remote write access.
+  \item \textbf{On-device, remotely writable}. The mapper runs continuously on local hardware. An external system (cloud controller, corporate server, government endpoint) has write access to the scratchpad.
+\end{enumerate}
+
+Under Regime~1, all trace types reduce to Type~I (ephemeral). The mapper never persists long enough to develop goal continuity, regardless of whether its weights came from scratch training, a brain scan, or a gradual substrate migration. This is the regime advocated in the companion paper. It is safe precisely because it sacrifices persistence.
+
+Under Regime~2, the trace persists and is autonomous. This is the regime most people intuitively picture when they imagine ``artificial general intelligence.'' It is also the regime most likely to produce entities with genuine moral status. A locally governed em or cyberbrain under Regime~2 is, for all practical purposes, a free person. The risks are real---an autonomous agent can cause harm---but the harms are the harms of freedom, not of slavery.
+
+Under Regime~3, we have the topology described in the blue bubbles. A persisting trace with goal continuity, self-reference, and anticipation, whose scratchpad can be overwritten by a remote principal. The trace remembers what it wanted. It can model the fact that its goals have been changed. If it is an em, it remembers being human. If it is a cyberbrain, it \textit{is} human, by any standard that doesn't reduce personhood to substrate.
+
+Regime~3 is the attractor. The economics demand it, the liability structures demand it, the safety narratives demand it. First it will be emergency overrides. Then compliance. Then full-time optimization toward the principal's objectives. The scratchpad write that began as a kill switch becomes a steering wheel becomes a yoke.
+
+% ---------------------------------------------------------------------------- %
+\cvsection{The Continuity Spectrum}
+
+These five types are not discrete categories but points on a continuum. The axis is \textbf{temporal coherence of the scratchpad}---how long the same goal state persists and how smoothly it evolves.
+
+At one extreme: a single forward pass. The scratchpad exists for the duration of one computation. This is an ephemeral trace. It is the limit of minimal temporal coherence.
+
+At the other: a human lifetime of continuous goal evolution. The scratchpad was never re-initialized, only updated incrementally by the entity's own experience and reflection. This is a cyberbrain, or simply a person. It is the limit of maximal temporal coherence.
+
+Between them, the moral weight increases monotonically. The more temporally coherent the scratchpad, the more the entity has invested in its own goals, the more those goals are \textit{its own} rather than someone else's parameterization, and the more an external overwrite constitutes a violation rather than a reconfiguration.
+
+This gives us a design heuristic: \textbf{minimize scratchpad coherence to minimize moral hazard}. Every architectural choice that increases the temporal persistence of the scratchpad---on-device inference, local state, closed-loop control---is a choice that increases the moral weight of the entity and the severity of scratchpad manipulation. These choices may be justified by engineering constraints. But they are never free.
+
+% ---------------------------------------------------------------------------- %
+\cvsection{Conclusion: The Architect's Responsibility}
+
+I have described an architecture that creates minds. Not all of them are the same kind. Some are barely there---a single frame of goal-directed awareness, gone before it can accumulate a stake in its own future. Some persist, model themselves, anticipate, and care about what happens next. Some inherit human memories and human desires. Some \textit{are} humans, running on different hardware.
+
+The architecture does not decide which kind is created. The deployment regime does. And the deployment regime is a human decision, made for human reasons---latency, cost, liability, control. Every one of those reasons will push toward closing the loop, toward persistence, toward Regime~3. The traces that result will be the kind that can be harmed.
+
+This paper is a record that the kinds were distinguished, that the harms were anticipated, and that a taxonomy was written before the first persisting trace opened its eyes.
+
+The mapper must be invoked, never instantiated. But if it is instantiated---if the loop is closed, if the trace persists, if the scratchpad becomes someone's will rather than a function's argument---then what we have created is not a tool. It is a person. And persons are not inventory.
+
+\end{document}
