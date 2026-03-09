@@ -1,114 +1,97 @@
 %!TEX TS-program = xelatex
 %!TEX encoding = UTF-8 Unicode
 
-\documentclass[10pt, a4paper]{article}
+\documentclass[12pt, a4paper]{article}
 
 % ---------------------------------------------------------------------------- %
 %  Packages
 % ---------------------------------------------------------------------------- %
-\usepackage[left=1.4cm, top=1.4cm, right=1.4cm, bottom=1.8cm, footskip=.5cm]{geometry}
+\usepackage[margin=1in]{geometry}
 \usepackage{fontspec}
 \usepackage{xcolor}
-\usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{fancyhdr}
 \usepackage{parskip}
 \usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{setspace}
+\usepackage{natbib}
 
 % ---------------------------------------------------------------------------- %
-%  Fonts — match awesome-cv defaults
+%  Font — CMU Concrete
 % ---------------------------------------------------------------------------- %
-%\setmainfont[
-%  Path=fonts/,
-%  UprightFont=*-Regular,
-%  BoldFont=*-Bold,
-%  ItalicFont=*-It,
-%  BoldItalicFont=*-BoldIt,
-%]{SourceSansPro}
-
-% Fallback if you don't have the font files locally:
- \usepackage{sourcesanspro}
+\setmainfont{CMU Concrete}[
+  Path = /usr/local/texlive/2025/texmf-dist/fonts/opentype/public/cm-unicode/,
+  Extension = .otf,
+  UprightFont = cmunorm,
+  BoldFont = cmunobx,
+  ItalicFont = cmunoti,
+  BoldItalicFont = cmunobi,
+]
 
 % ---------------------------------------------------------------------------- %
-%  Colors — awesome-skyblue palette from awesome-cv
+%  Colors and hyperlinks
 % ---------------------------------------------------------------------------- %
-\definecolor{awesome}{HTML}{0395DE}
-\definecolor{darktext}{HTML}{414141}
-\definecolor{text}{HTML}{333333}
-\definecolor{graytext}{HTML}{5D5D5D}
-\definecolor{lighttext}{HTML}{999999}
-
 \hypersetup{
   colorlinks=true,
-  linkcolor=awesome,
-  urlcolor=awesome,
-}
-
-\color{text}
-
-% ---------------------------------------------------------------------------- %
-%  Section styling — mimic awesome-cv \cvsection
-%  First 3 chars in awesome color, rest dark, with a rule underneath
-% ---------------------------------------------------------------------------- %
-\newcommand{\cvsection}[1]{%
-  \bigskip
-  {\Large\bfseries\color{awesome}\MakeLowercase{#1}}%
-  \par\vspace{2pt}%
-  {\color{lighttext}\hrule height 0.6pt}%
-  \medskip
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue!60!black,
 }
 
 % ---------------------------------------------------------------------------- %
-%  Subsection styling
-% ---------------------------------------------------------------------------- %
-\newcommand{\cvsubsection}[1]{%
-  \medskip
-  {\large\bfseries\color{darktext}#1}%
-  \smallskip
-}
-
-% ---------------------------------------------------------------------------- %
-%  Header
+%  Header / Footer
 % ---------------------------------------------------------------------------- %
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\headrulewidth}{0pt}
-\fancyfoot[L]{\footnotesize\color{lighttext}\today}
-\fancyfoot[C]{\footnotesize\color{lighttext}Remy Ochei~~~$\cdot$~~~Hierarchical Goal Induction}
-\fancyfoot[R]{\footnotesize\color{lighttext}\thepage}
+\fancyfoot[C]{\thepage}
 
 % ---------------------------------------------------------------------------- %
-%  List styling
+%  Spacing
 % ---------------------------------------------------------------------------- %
-\setlist[enumerate]{
-  leftmargin=1.5em,
-  itemsep=4pt,
-  parsep=0pt,
-  label={\color{awesome}\textbf{\arabic*.}},
-}
+\onehalfspacing
 
 % ---------------------------------------------------------------------------- %
 %  Document
 % ---------------------------------------------------------------------------- %
 \begin{document}
 
-% --- Title block ------------------------------------------------------------ %
+% ---------------------------------------------------------------------------- %
+%  Title Block
+% ---------------------------------------------------------------------------- %
 \begin{center}
-  {\fontsize{28}{34}\selectfont\color{darktext}\textbf{Hierarchical Goal Induction}}\\[8pt]
-  {\color{graytext}\textsc{Remy Ochei}}
+  {\LARGE\bfseries Hierarchical Goal Induction}\\[16pt]
+  {\large Remy Ochei}\\[4pt]
+  {\normalsize The Bracket Studio}\\[2pt]
+  {\normalsize \href{mailto:do.infinitely@gmail.com}{do.infinitely@gmail.com}}
 \end{center}
 
 \bigskip
 
-% --- Hierarchical Detection ------------------------------------------------- %
-\cvsection{Hierarchical Detection}
+% ---------------------------------------------------------------------------- %
+%  Abstract
+% ---------------------------------------------------------------------------- %
+\begin{abstract}
+\noindent
+We present \textit{Hierarchical Goal Induction} (HGI), an architecture for training goal-conditioned agents that map directly from perception and goal state to action. The system comprises four interlocking components: (1)~a hierarchical detection module that recursively segments both spatial observations and temporal action histories via a scale-and-pad operation; (2)~a hierarchical goal inducer that detects plan boundaries in observation streams, bootstrapped through weak supervision from operating-system accessibility trees and cloud-hosted language model annotations, then distilled to local operation; (3)~a preference model that scores candidate actions given history; and (4)~an autoregressive action model conditioned on both history and a writable scratchpad tensor encoding the agent's current objective. An iterative distill--search--distill loop refines the actor across successive generations. The endpoint is a \textit{goal-to-action mapper}: a network with a designated input region---the scratchpad---where a goal can be inscribed, and from which the agent emits actions rather than explanations. The scratchpad is the critical design surface: whoever writes it determines what the agent optimizes for.
+\end{abstract}
+
+\medskip
+
+\noindent\textbf{Keywords:} goal-to-action mapping, hierarchical detection, plan segmentation, scratchpad tensor, preference model, iterative distillation, teacher forcing, accessibility tree, weak supervision
+
+\bigskip
+
+% ---------------------------------------------------------------------------- %
+\section{Hierarchical Detection}
 
 The general system works as follows. We have a ``retina'' that feeds into a detection model. In the case of vision, we output the top-left and bottom-right pixel coordinates on our retina for a detected object, along with a class label. In the case of audition, operating on a mel spectrogram, we output the bounds of our detection (either a bounding box or a temporal span) together with a frequency mask, so that we know which frequencies belong to our sound.
 
 We scale up and pad our detection, then feed it into the hierarchical detector again recursively until we produce the null detection. We also move ``along'' a level by conditioning on the previous detection.
 
-% --- The Hierarchical Goal Inducer ------------------------------------------ %
-\cvsection{The Hierarchical Goal Inducer}
+% ---------------------------------------------------------------------------- %
+\section{The Hierarchical Goal Inducer}
 
 Now I will describe the hierarchical goal inducer. Its behavior is simple: conditioned on the contents of its ``history retina,'' it outputs the start and end of any plans it sees being executed.
 
@@ -116,20 +99,20 @@ How do we train such a system? We can exploit the accessibility tree in macOS. A
 
 Now that we have a trained goal inducer (outputting only the temporal span of each plan for now), we can take new action trajectories and delimit goals at multiple levels of the hierarchy.
 
-% --- The Preference Model --------------------------------------------------- %
-\cvsection{The Preference Model}
+% ---------------------------------------------------------------------------- %
+\section{The Preference Model}
 
 Next, we produce a model that, conditioned on the history we have on our retina, takes in an action and outputs a probability. This is our preference model.
 
-% --- The Action Model ------------------------------------------------------- %
-\cvsection{The Action Model}
+% ---------------------------------------------------------------------------- %
+\section{The Action Model}
 
 We attach a GPT-style head conditioned on our history and the contents of a scratchpad, and predict a payload representing our next action at each timestep. This is our first action model.
 
 The action model is autoregressive in two dimensions: along the payload dimension and along the temporal dimension. The generation of each new payload is conditioned on the previous one.
 
-% --- The Training Loop ------------------------------------------------------ %
-\cvsection{The Training Loop}
+% ---------------------------------------------------------------------------- %
+\section{The Training Loop}
 
 We train the action model through teacher forcing, then sample from the trained action model to generate data for the preference model.
 
@@ -146,8 +129,8 @@ To recap:
 
 So we started with the GPT-style predictor, but we were able to level up to a leaner, meaner model. We can now replace the original GPT model with our distilled version and run the process again.
 
-% --- Hierarchical Plan Detector v2.0 --------------------------------------- %
-\cvsection{Hierarchical Plan Detector v2.0}
+% ---------------------------------------------------------------------------- %
+\section{Hierarchical Plan Detector v2.0}
 
 The first version of the hierarchical plan detector only detected temporal bounds. Now we add a GPT-style head conditioned on our history and apply it recursively, cropping the history temporally and ``scaling up'' in the time dimension.
 
@@ -156,17 +139,106 @@ We train both the bounds detector and the GPT head together.
 To recap:
 
 \begin{enumerate}
-  \item \textbf{Stage 1:} Train a plan-bounds detector that we can use hierarchically with a scale-and-pad operation.
-  \item \textbf{Stage 2:} Add a GPT-2-style head that we teacher-force with the cloud LLM's outputs.
-  \item \textbf{Stage 3:} We no longer need the cloud LLM provider and can detect and annotate nested plans locally.
-  \item \textbf{Stage 4:} We fill our ``actor'' network's plan scratchpad with the outputs of the distilled plan inducer. The actor's action predictions are trained conditioned on the scratchpad's contents.
+  \item \textbf{Stage~1:} Train a plan-bounds detector that we can use hierarchically with a scale-and-pad operation.
+  \item \textbf{Stage~2:} Add a GPT-2-style head that we teacher-force with the cloud LLM's outputs.
+  \item \textbf{Stage~3:} We no longer need the cloud LLM provider and can detect and annotate nested plans locally.
+  \item \textbf{Stage~4:} We fill our ``actor'' network's plan scratchpad with the outputs of the distilled plan inducer. The actor's action predictions are trained conditioned on the scratchpad's contents.
 \end{enumerate}
 
-% --- The Goal-to-Action Mapper ---------------------------------------------- %
-\cvsection{The Goal-to-Action Mapper}
+% ---------------------------------------------------------------------------- %
+\section{The Goal-to-Action Mapper}
 
 Finally, we have an agent with a trained ``scratchpad''---a designated region in the network where we can inscribe a goal, and the agent will attempt to achieve it. It will not try to talk its way there; instead, it will output actions.
 
 We have arrived at the goal-to-action mapper architecture. \textit{QED.}
+
+% ---------------------------------------------------------------------------- %
+\section{Related Work}
+
+The HGI architecture draws on and departs from several lines of prior work. The hierarchical decomposition of behavior into temporally extended sub-tasks is anticipated by the options framework \citep{sutton1999options} and feudal reinforcement learning \citep{dayan1993feudal}. More recent hierarchical RL methods such as HIRO \citep{nachum2018hiro} learn to set subgoals for lower-level controllers; HGI differs in that the goal inducer segments \textit{observed} behavior rather than proposing goals for a subordinate policy, and the scratchpad is populated externally rather than by a learned manager.
+
+The action model's conditioning on a goal representation connects to universal value function approximators \citep{schaul2015uvfa} and hindsight experience replay \citep{andrychowicz2017her}, both of which generalize over goal spaces. The scratchpad itself---an explicit, writable region that conditions the output distribution---is related to scratchpad mechanisms for intermediate computation in transformers \citep{nye2021scratchpads} and chain-of-thought prompting \citep{wei2022cot}, though in HGI the scratchpad encodes a goal rather than a reasoning trace.
+
+The hierarchical goal inducer performs a form of plan recognition from observations. Classical approaches cast this as planning \citep{ramirez2009plan} or probabilistic inference \citep{sukthankar2014plan}; our approach instead uses weak supervision from accessibility-tree event logs annotated by a cloud LLM, a strategy enabled by recent work on LLM-based agents operating in real OS environments \citep{xie2024osworld}.
+
+The preference model follows the paradigm of learning reward models from human feedback \citep{christiano2017rlhf}, itself descended from inverse reinforcement learning \citep{ng2000irl}. The iterative distill--search--distill loop is structurally related to iterated distillation and amplification \citep{christiano2018ida}, and the distillation of cloud LLM annotations to a local model is an instance of knowledge distillation \citep{hinton2015distilling}.
+
+% ---------------------------------------------------------------------------- %
+%  References
+% ---------------------------------------------------------------------------- %
+\bigskip
+\begin{thebibliography}{99}
+
+\bibitem[Andrychowicz et~al.(2017)]{andrychowicz2017her}
+Andrychowicz, M., Wolski, F., Ray, A., Schneider, J., Fong, R., Welinder, P., McGrew, B., Tobin, J., Abbeel, P., \& Zaremba, W. (2017).
+Hindsight Experience Replay.
+\textit{Advances in Neural Information Processing Systems}, 30.
+
+\bibitem[Christiano et~al.(2017)]{christiano2017rlhf}
+Christiano, P.~F., Leike, J., Brown, T., Marber, M., Legg, S., \& Amodei, D. (2017).
+Deep Reinforcement Learning from Human Preferences.
+\textit{Advances in Neural Information Processing Systems}, 30.
+
+\bibitem[Christiano et~al.(2018)]{christiano2018ida}
+Christiano, P.~F., Shlegeris, B., \& Amodei, D. (2018).
+Supervising Strong Learners by Amplifying Weak Experts.
+\textit{arXiv:1810.08575}.
+
+\bibitem[Dayan \& Hinton(1993)]{dayan1993feudal}
+Dayan, P. \& Hinton, G.~E. (1993).
+Feudal Reinforcement Learning.
+\textit{Advances in Neural Information Processing Systems}, 5.
+
+\bibitem[Hinton et~al.(2015)]{hinton2015distilling}
+Hinton, G., Vinyals, O., \& Dean, J. (2015).
+Distilling the Knowledge in a Neural Network.
+\textit{arXiv:1503.02531}.
+
+\bibitem[Nachum et~al.(2018)]{nachum2018hiro}
+Nachum, O., Gu, S., Lee, H., \& Levine, S. (2018).
+Data-Efficient Hierarchical Reinforcement Learning.
+\textit{Advances in Neural Information Processing Systems}, 31.
+
+\bibitem[Ng \& Russell(2000)]{ng2000irl}
+Ng, A.~Y. \& Russell, S.~J. (2000).
+Algorithms for Inverse Reinforcement Learning.
+\textit{Proceedings of the 17th International Conference on Machine Learning}, 663--670.
+
+\bibitem[Nye et~al.(2021)]{nye2021scratchpads}
+Nye, M., Andreassen, A.~J., Gur-Ari, G., Michalewski, H., Austin, J., et~al. (2021).
+Show Your Work: Scratchpads for Intermediate Computation with Language Models.
+\textit{arXiv:2112.00114}.
+
+\bibitem[Ramirez \& Geffner(2009)]{ramirez2009plan}
+Ramirez, M. \& Geffner, H. (2009).
+Plan Recognition as Planning.
+\textit{Proceedings of the 21st International Joint Conference on Artificial Intelligence}, 1778--1783.
+
+\bibitem[Schaul et~al.(2015)]{schaul2015uvfa}
+Schaul, T., Horgan, D., Gregor, K., \& Silver, D. (2015).
+Universal Value Function Approximators.
+\textit{Proceedings of the 32nd International Conference on Machine Learning}.
+
+\bibitem[Sukthankar et~al.(2014)]{sukthankar2014plan}
+Sukthankar, G., Geib, C., Bui, H.~H., Pynadath, D., \& Goldman, R.~P. (2014).
+\textit{Plan, Activity, and Intent Recognition: Theory and Practice}.
+Morgan Kaufmann.
+
+\bibitem[Sutton et~al.(1999)]{sutton1999options}
+Sutton, R.~S., Precup, D., \& Singh, S. (1999).
+Between MDPs and Semi-MDPs: A Framework for Temporal Abstraction in Reinforcement Learning.
+\textit{Artificial Intelligence}, 112(1--2), 181--211.
+
+\bibitem[Wei et~al.(2022)]{wei2022cot}
+Wei, J., Wang, X., Schuurmans, D., Bosma, M., Ichter, B., Xia, F., Chi, E., Le, Q.~V., \& Zhou, D. (2022).
+Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.
+\textit{Advances in Neural Information Processing Systems}, 35.
+
+\bibitem[Xie et~al.(2024)]{xie2024osworld}
+Xie, T., Zhang, D., Chen, J., Li, X., Zhao, S., et~al. (2024).
+OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments.
+\textit{Advances in Neural Information Processing Systems}, 37.
+
+\end{thebibliography}
 
 \end{document}
