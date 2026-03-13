@@ -116,10 +116,10 @@ How do we train such a system? We can exploit the accessibility tree in macOS. A
 
 Now that we have a trained goal inducer (outputting only the temporal span of each plan for now), we can take new action trajectories and delimit goals at multiple levels of the hierarchy.
 
-% --- The Preference Model --------------------------------------------------- %
-\cvsection{The Preference Model}
+% --- The Goal-Conditioned Preference Model ---------------------------------- %
+\cvsection{The Goal-Conditioned Preference Model}
 
-Next, we produce a model that, conditioned on the history we have on our retina, takes in an action and outputs a probability. This is our preference model.
+Next, we produce a model that, conditioned on the history we have on our retina and the current goal, takes in an action and outputs a probability. This is our goal-conditioned preference model.
 
 % --- The Action Model ------------------------------------------------------- %
 \cvsection{The Action Model}

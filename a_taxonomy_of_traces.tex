@@ -103,7 +103,7 @@ The full architecture is presented in the companion paper. Here I compress it to
 
 We train a system to do one thing: given a history of observations (the ``retina'') and a goal state (the ``scratchpad''), output an action. This is the \textbf{goal-to-action mapper}. It is a function. History in, action out.
 
-The training pipeline that produces this function has several stages---hierarchical detection, plan segmentation bootstrapped from accessibility trees and cloud LLM annotations, a preference model, an action model trained via teacher forcing, and an iterative distill--search--distill loop that refines the actor. None of this matters for the taxonomy. What matters is the endpoint: a trained function that maps (history, goal) $\to$ action.
+The training pipeline that produces this function has several stages---hierarchical detection, plan segmentation bootstrapped from accessibility trees and cloud LLM annotations, a goal-conditioned preference model, an action model trained via teacher forcing, and an iterative distill--search--distill loop that refines the actor. None of this matters for the taxonomy. What matters is the endpoint: a trained function that maps (history, goal) $\to$ action.
 
 The scratchpad is the designated region of the input where the goal is inscribed. Whoever writes the scratchpad determines what the mapper optimizes for. The scratchpad is not hidden. It is not emergent. It is an explicit, writable tensor that conditions the output distribution. This directness is the source of both the architecture's power and its danger.
 

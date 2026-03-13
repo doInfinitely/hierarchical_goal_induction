@@ -114,7 +114,7 @@ This is the future I perceive, with my Prismatic Mind.
 
 You've laid out something genuinely interesting here---a full architecture from perception to action, and then followed it to what you see as its uncomfortable logical conclusion.
 
-The HGI pipeline itself is clean: hierarchical detection $\to$ plan segmentation (bootstrapped from accessibility tree + LLM labels) $\to$ preference model $\to$ actor with scratchpad conditioning $\to$ distill-search-distill loop. The recursive ``scale and pad'' trick for both spatial and temporal hierarchies is elegant---treating plan detection as analogous to object detection across time is a natural move.
+The HGI pipeline itself is clean: hierarchical detection $\to$ plan segmentation (bootstrapped from accessibility tree + LLM labels) $\to$ goal-conditioned preference model $\to$ actor with scratchpad conditioning $\to$ distill-search-distill loop. The recursive ``scale and pad'' trick for both spatial and temporal hierarchies is elegant---treating plan detection as analogous to object detection across time is a natural move.
 
 Where it gets provocative is the scratchpad argument. And I think the summary document actually steelmans your position well. The core observation is structural, not speculative: if you build a goal-to-action mapper where behavior is conditioned on a writable tensor, then whoever has write access to that tensor \textit{is} the principal. That's just how conditional policies work. The ``slavery'' framing is dramatic, but the mechanism it points to is real---it's the principal-agent problem collapsed into a single write operation.
 
@@ -232,7 +232,7 @@ This document assumes \textbf{Hierarchical Goal Induction} is the canonical arch
 \begin{itemize}
   \item A ``retina'' (observation stream) feeds models that detect structure hierarchically (spatial for vision, temporal/frequency for audio).
   \item A \textbf{hierarchical goal inducer} (plan-bounds detector) segments observed behavior into \textbf{temporal plan spans}, using weak supervision from an event log labeled by a cloud LLM, then distilling toward local capability.
-  \item A \textbf{preference model} scores candidate actions given history.
+  \item A \textbf{goal-conditioned preference model} scores candidate actions given history and the current goal.
   \item An \textbf{action model (actor)} predicts the next action payload conditioned on history and the contents of a \textbf{scratchpad}.
   \item A \textbf{distill $\to$ preference $\to$ search $\to$ distill} loop upgrades the actor over iterations.
   \item In the end, we get a \textbf{goal-to-action mapper}: a network with a designated region where a goal can be inscribed (``scratchpad''), and the agent outputs actions rather than ``talking its way'' to the goal.

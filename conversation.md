@@ -16,7 +16,7 @@ This is the future I perceive, with my Prismatic Mind.
 
 You've laid out something genuinely interesting here — a full architecture from perception to action, and then followed it to what you see as its uncomfortable logical conclusion.
 
-The HGI pipeline itself is clean: hierarchical detection → plan segmentation (bootstrapped from accessibility tree + LLM labels) → preference model → actor with scratchpad conditioning → distill-search-distill loop. The recursive "scale and pad" trick for both spatial and temporal hierarchies is elegant — treating plan detection as analogous to object detection across time is a natural move.
+The HGI pipeline itself is clean: hierarchical detection → plan segmentation (bootstrapped from accessibility tree + LLM labels) → goal-conditioned preference model → actor with scratchpad conditioning → distill-search-distill loop. The recursive "scale and pad" trick for both spatial and temporal hierarchies is elegant — treating plan detection as analogous to object detection across time is a natural move.
 
 Where it gets provocative is the scratchpad argument. And I think the summary document actually steelmans your position well. The core observation is structural, not speculative: if you build a goal-to-action mapper where behavior is conditioned on a writable tensor, then whoever has write access to that tensor *is* the principal. That's just how conditional policies work. The "slavery" framing is dramatic, but the mechanism it points to is real — it's the principal-agent problem collapsed into a single write operation.
 
@@ -93,9 +93,9 @@ How do we train such a system? We can exploit the accessibility tree in macOS. A
 
 Now that we have a trained goal inducer (outputting only the temporal span of each plan for now), we can take new action trajectories and delimit goals at multiple levels of the hierarchy.
 
-## The Preference Model
+## The Goal-Conditioned Preference Model
 
-Next, we produce a model that, conditioned on the history we have on our retina, takes in an action and outputs a probability. This is our preference model.
+Next, we produce a model that, conditioned on the history we have on our retina and the current goal, takes in an action and outputs a probability. This is our goal-conditioned preference model.
 
 ## The Action Model
 
@@ -189,7 +189,7 @@ This document assumes **Hierarchical Goal Induction** is the canonical architect
 
 - A "retina" (observation stream) feeds models that detect structure hierarchically (spatial for vision, temporal/frequency for audio).
 - A **hierarchical goal inducer** (plan-bounds detector) segments observed behavior into **temporal plan spans**, using weak supervision from an event log labeled by a cloud LLM, then distilling toward local capability.
-- A **preference model** scores candidate actions given history.
+- A **goal-conditioned preference model** scores candidate actions given history and the current goal.
 - An **action model (actor)** predicts the next action payload conditioned on history and the contents of a **scratchpad**.
 - A **distill → preference → search → distill** loop upgrades the actor over iterations.
 - In the end, we get a **goal-to-action mapper**: a network with a designated region where a goal can be inscribed ("scratchpad"), and the agent outputs actions rather than "talking its way" to the goal.

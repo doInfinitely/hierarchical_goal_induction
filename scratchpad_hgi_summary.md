@@ -5,7 +5,7 @@ This document assumes **Hierarchical Goal Induction** is the canonical architect
 
 - A “retina” (observation stream) feeds models that detect structure hierarchically (spatial for vision, temporal/frequency for audio).
 - A **hierarchical goal inducer** (plan-bounds detector) segments observed behavior into **temporal plan spans**, using weak supervision from an event log labeled by a cloud LLM, then distilling toward local capability.
-- A **preference model** scores candidate actions given history.
+- A **goal-conditioned preference model** scores candidate actions given history and the current goal.
 - An **action model (actor)** predicts the next action payload conditioned on history and the contents of a **scratchpad**.
 - A **distill → preference → search → distill** loop upgrades the actor over iterations.
 - In the end, we get a **goal-to-action mapper**: a network with a designated region where a goal can be inscribed (“scratchpad”), and the agent outputs actions rather than “talking its way” to the goal.

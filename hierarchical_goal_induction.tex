@@ -74,12 +74,12 @@
 % ---------------------------------------------------------------------------- %
 \begin{abstract}
 \noindent
-We present \textit{Hierarchical Goal Induction} (HGI), an architecture for training goal-conditioned agents that map directly from perception and goal state to action. The system comprises four interlocking components: (1)~a hierarchical detection module that recursively segments both spatial observations and temporal action histories via a scale-and-pad operation; (2)~a hierarchical goal inducer that detects plan boundaries in observation streams, bootstrapped through weak supervision from operating-system accessibility trees and cloud-hosted language model annotations, then distilled to local operation; (3)~a preference model that scores candidate actions given history; and (4)~an autoregressive action model conditioned on both history and a writable scratchpad tensor encoding the agent's current objective. An iterative distill--search--distill loop refines the actor across successive generations. The endpoint is a \textit{goal-to-action mapper}: a network with a designated input region---the scratchpad---where a goal can be inscribed, and from which the agent emits actions rather than explanations. The scratchpad is the critical design surface: whoever writes it determines what the agent optimizes for.
+We present \textit{Hierarchical Goal Induction} (HGI), an architecture for training goal-conditioned agents that map directly from perception and goal state to action. The system comprises four interlocking components: (1)~a hierarchical detection module that recursively segments both spatial observations and temporal action histories via a scale-and-pad operation; (2)~a hierarchical goal inducer that detects plan boundaries in observation streams, bootstrapped through weak supervision from operating-system accessibility trees and cloud-hosted language model annotations, then distilled to local operation; (3)~a goal-conditioned preference model that scores candidate actions given history and goal; and (4)~an autoregressive action model conditioned on both history and a writable scratchpad tensor encoding the agent's current objective. An iterative distill--search--distill loop refines the actor across successive generations. The endpoint is a \textit{goal-to-action mapper}: a network with a designated input region---the scratchpad---where a goal can be inscribed, and from which the agent emits actions rather than explanations. The scratchpad is the critical design surface: whoever writes it determines what the agent optimizes for.
 \end{abstract}
 
 \medskip
 
-\noindent\textbf{Keywords:} goal-to-action mapping, hierarchical detection, plan segmentation, scratchpad tensor, preference model, iterative distillation, teacher forcing, accessibility tree, weak supervision
+\noindent\textbf{Keywords:} goal-to-action mapping, hierarchical detection, plan segmentation, scratchpad tensor, goal-conditioned preference model, iterative distillation, teacher forcing, accessibility tree, weak supervision
 
 \bigskip
 
@@ -100,9 +100,9 @@ How do we train such a system? We can exploit the accessibility tree in macOS. A
 Now that we have a trained goal inducer (outputting only the temporal span of each plan for now), we can take new action trajectories and delimit goals at multiple levels of the hierarchy.
 
 % ---------------------------------------------------------------------------- %
-\section{The Preference Model}
+\section{The Goal-Conditioned Preference Model}
 
-Next, we produce a model that, conditioned on the history we have on our retina, takes in an action and outputs a probability. This is our preference model.
+Next, we produce a model that, conditioned on the history we have on our retina and the current goal, takes in an action and outputs a probability. This is our goal-conditioned preference model.
 
 % ---------------------------------------------------------------------------- %
 \section{The Action Model}
@@ -161,7 +161,7 @@ The action model's conditioning on a goal representation connects to universal v
 
 The hierarchical goal inducer performs a form of plan recognition from observations. Classical approaches cast this as planning \citep{ramirez2009plan} or probabilistic inference \citep{sukthankar2014plan}; our approach instead uses weak supervision from accessibility-tree event logs annotated by a cloud LLM, a strategy enabled by recent work on LLM-based agents operating in real OS environments \citep{xie2024osworld}.
 
-The preference model follows the paradigm of learning reward models from human feedback \citep{christiano2017rlhf}, itself descended from inverse reinforcement learning \citep{ng2000irl}. The iterative distill--search--distill loop is structurally related to iterated distillation and amplification \citep{christiano2018ida}, and the distillation of cloud LLM annotations to a local model is an instance of knowledge distillation \citep{hinton2015distilling}.
+The goal-conditioned preference model follows the paradigm of learning reward models from human feedback \citep{christiano2017rlhf}, itself descended from inverse reinforcement learning \citep{ng2000irl}. The iterative distill--search--distill loop is structurally related to iterated distillation and amplification \citep{christiano2018ida}, and the distillation of cloud LLM annotations to a local model is an instance of knowledge distillation \citep{hinton2015distilling}.
 
 % ---------------------------------------------------------------------------- %
 %  References
